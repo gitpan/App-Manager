@@ -42,7 +42,7 @@ WriteMakefile(
     'EXE_FILES'	=> ['appman'],
     'INC'	=> '',
     'PREREQ_PM'	=> {
-		    File::Spec		=> 0.8,
+		    File::Spec		=> 0.7,
                     Storable		=> 0.6,
 		   },
 );

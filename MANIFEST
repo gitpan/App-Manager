@@ -8,4 +8,5 @@ Makefile.PL
 t/load.t
 Manager.pm
 Manager.xs
+libtracer.c
 appman

@@ -2,7 +2,7 @@
 
 use Getopt::Long;
 use Cwd;
-use File::Spec 0.8;
+use File::Spec 0.7;
 use App::Manager qw(slog trace_program);
 use POSIX 'strftime';
 
@@ -59,7 +59,7 @@ sub cmd_install {
    };
 
    $excl_dir->(getcwd);
-   $excl_dir->(File::Spec->tmpdir);
+   eval { $excl_dir->(File::Spec->tmpdir) };
    $excl_dir->('/tmp');
    $excl_dir->('/usr/tmp');
    $excl_dir->('/var/tmp');

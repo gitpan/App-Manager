@@ -8,7 +8,7 @@ require Exporter;
 require DynaLoader;
 
 use IO::Socket::UNIX;
-use File::Spec 0.8;
+use File::Spec 0.7;
 use File::Basename;
 use Cwd;
 use Fcntl;
@@ -21,13 +21,14 @@ BEGIN {
 
    @EXPORT = qw(trace_program);
    @EXPORT_OK = (@EXPORT,qw(slog S_ISLNK S_ISREG S_ISDIR S_IFMT));
-   $VERSION = '0.01';
+   $VERSION = '0.02';
 }
 
 bootstrap App::Manager $VERSION;
 
 $verbose=0;
-$unix_path = File::Spec->tmpdir."/installtracer_socket$$~";
+
+$unix_path = (eval { File::Spec->tmpdir } || "/tmp")."/installtracer_socket$$~";
 
 sub slog($@) {
    (print STDERR "APPMAN: ",@_,"\n") if $verbose => shift;

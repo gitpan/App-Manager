@@ -1,5 +1,11 @@
 Revision history for Perl extension App::Manager
 
+0.02 Tue Jun 15 21:35:56 CEST 1999
+	- fixed stupid omission of libtracer.c.
+        - lowered version reqs. for File::Spec, as version 0.8
+          is not yet on CPAN (WHY I ASD, WHYYY!!!)
+
 0.01  Sat Jun 12 12:36:57 CEST 1999
 	- original version; created manually.
+      
 
