@@ -54,6 +54,7 @@ sub cmd_install {
 
    my $excl_dir = sub {
       my $dir = Cwd::abs_path shift;
+      return unless $dir =~ /^\//;
       slog 1,"adding '$dir' to the ignorelist" unless $excl{$dir};
       $excl{$dir}++;
    };

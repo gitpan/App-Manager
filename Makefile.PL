@@ -1,9 +1,21 @@
 use ExtUtils::MakeMaker;
+use POSIX;
 
 if ($ARGV[0] =~ /^LIBDIR=(.*)$/) {
    $LIBDIR = $1;
 } else {
    $LIBDIR = "/var/appman";
+}
+
+if ((uname)[0] !~ /linux/i) {
+   print <<EOF;
+
+WARNING: You are not running Linux. Better make sure your system supports
+         dynamic linking, symbol versioning, gnu-binutils, libdl and RTLD_NEXT.
+         glibc-2.1 might also be neccessary until I conditionalize versioning
+         support.
+
+EOF
 }
 
 sub MY::postamble {
@@ -23,8 +35,15 @@ install :: all
 clean ::
 	\$(RM_F) libtracer.\$(DLEXT)
 
-libtracer.\$(DLEXT): libtracer.c
-	\$(CC) \$(LDDLFLAGS) \$(CCCDLFLAGS) -O -o \$@ \$^ -lc -ldl
+replace.c: gensym
+	\$(PERL) ./gensym
+
+libtracer\$(OBJ_EXT): libtracer.c replace.c 
+	\$(CC) -D_GNU_SOURCE -D_POSIX_SOURCE -c -o \$@ libtracer.c
+
+libtracer.\$(DLEXT): libtracer\$(OBJ_EXT)
+	ld -o \$@ -shared \$^ -ldl --version-script Versions.def
+	\$(CHMOD) \$(PERM_RWX) \$@
 
 EOF
 }
@@ -45,5 +64,6 @@ WriteMakefile(
 		    File::Spec		=> 0.7,
                     Storable		=> 0.6,
 		   },
+    'clean'	=> { FILES => "Versions.def replace.c" },
 );
 

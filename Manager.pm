@@ -21,7 +21,7 @@ BEGIN {
 
    @EXPORT = qw(trace_program);
    @EXPORT_OK = (@EXPORT,qw(slog S_ISLNK S_ISREG S_ISDIR S_IFMT));
-   $VERSION = '0.02';
+   $VERSION = '0.03';
 }
 
 bootstrap App::Manager $VERSION;
@@ -286,10 +286,7 @@ sub optimize($$) {
                 && $stat->{uid} eq $nstat->{uid}
                 && $stat->{gid} eq $nstat->{gid}
                 && $stat->{size} eq $nstat->{size}
-                && ($level > 0
-                    || ($stat->{atime} eq $nstat->{atime}
-                        && $stat->{mtime} eq $nstat->{mtime}
-                ))) {
+                && ($level > 0 || $stat->{mtime} eq $nstat->{mtime})) {
                $msg = "no change";
                delete $self->{storage}{$stat->{id}};
                delete $self->{source}{$stat->{path}};

@@ -9,6 +9,9 @@ WHAT IT IS
         etc. It will save all the files before they were modified. It can
         then undo and redo the changes as often as you want.
 
+        At the moment, Linux is probably the only system that is
+        supported.
+
 EXAMPLE
 
 	Here is a short walk-through:

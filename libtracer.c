@@ -15,6 +15,14 @@ static void initialize (void);
 static int initialized;
 static int fh;
 
+#if 1
+# define symbol_version(real, name, version) __asm__ (".symver " #real "," #name "@" #version)
+# define default_symbol_version(real, name, version) __asm__ (".symver " #real "," #name "@@" #version)
+#else
+# define symbol_version(real, name, version)
+# define default_symbol_version(real, name, version)
+#endif
+
 #define SS do {
 #define SE } while(0)
 
@@ -120,18 +128,35 @@ static void uninitialize (void)
     }
 }
 
+void *findsym (const char *func, const char *version)
+{
+  void *real_func;
+
+  if (version)
+    real_func = dlvsym (RTLD_NEXT, func, version);
+  else
+    real_func = dlsym (RTLD_NEXT, func);
+
+  if (!real_func)
+    {
+      fprintf (stderr, "FATAL: function %s not found\n", func);
+      exit (63);
+    }
+    
+  return real_func;
+}
+
 /* stub functions following */
 
-#define REAL_FUNC(res,name,proto) 		\
-    static res (*real_func)proto;		\
-    if (!real_func)				\
-      real_func = dlsym (RTLD_NEXT, #name);	\
-    assert_perror (real_func)
+#define REAL_FUNC(res,name,vers,proto) 				\
+    static res (*real_func)proto;				\
+    if (!real_func)						\
+      real_func = findsym (#name, vers);
 
 int open (const char *file, int oflag, ...)
 {
   mode_t mode;
-  REAL_FUNC (int,open,(const char *,int,mode_t));
+  REAL_FUNC (int,open,0,(const char *,int,mode_t));
 
   if (oflag & O_CREAT)
     {
@@ -150,7 +175,7 @@ int open (const char *file, int oflag, ...)
 int open64 (const char *file, int oflag, ...)
 {
   mode_t mode;
-  REAL_FUNC (int,open64,(const char *,int,mode_t));
+  REAL_FUNC (int,open64,0,(const char *,int,mode_t));
 
   if (oflag & O_CREAT)
     {
@@ -166,75 +191,13 @@ int open64 (const char *file, int oflag, ...)
   return real_func (file, oflag, mode);
 }
 
-int creat (const char *file, mode_t mode)
-{
-  REAL_FUNC (int,creat,(const char *,mode_t));
-  gen_change (file);
-  return real_func (file, mode);
-}
-
-int creat64 (const char *file, mode_t mode)
-{
-  REAL_FUNC (int,creat64,(const char *,mode_t));
-  gen_change (file);
-  return real_func (file, mode);
-}
-
-int mkdir (const char *path, mode_t mode)
-{
-  REAL_FUNC (int,mkdir,(const char *,mode_t));
-  gen_change (path);
-  return real_func (path, mode);
-}
-
-int rmdir (const char *path)
-{
-  REAL_FUNC (int,rmdir,(const char *));
-  gen_change (path);
-  return real_func (path);
-}
-
-int unlink (const char *path)
-{
-  REAL_FUNC (int,unlink,(const char *));
-  gen_change (path);
-  return real_func (path);
-}
-
-int remove (const char *path)
-{
-  REAL_FUNC (int,remove,(const char *));
-  gen_change (path);
-  return real_func (path);
-}
-
-int rename (const char *oldpath, const char *newpath)
-{
-  REAL_FUNC (int,rename,(const char *,const char *));
-  gen_change (oldpath);
-  gen_change (newpath);
-  return real_func (oldpath, newpath);
-}
-
-int link (const char *oldpath, const char *newpath)
-{
-  REAL_FUNC (int,link,(const char *,const char *));
-  gen_change (newpath);
-  return real_func (oldpath, newpath);
-}
-
-int symlink (const char *oldpath, const char *newpath)
-{
-  REAL_FUNC (int,symlink,(const char *,const char *));
-  gen_change (newpath);
-  return real_func (oldpath, newpath);
-}
-
 /* vfork is not a problem, but fork might, so cut the connection */
 
 pid_t fork (void)
 {
-  REAL_FUNC (pid_t,fork,(void));
+  REAL_FUNC (pid_t,fork,0,(void));
   uninitialize ();
   return real_func ();
 }
+
+#include "replace.c"
