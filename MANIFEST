@@ -1,0 +1,11 @@
+README
+Changes
+MANIFEST
+COPYING.Artistic
+COPYING.GNU
+COPYING
+Makefile.PL
+t/load.t
+Manager.pm
+Manager.xs
+appman
